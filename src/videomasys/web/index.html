@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#101828">
+    <title>VideoMASys — Ask a video</title>
+    <link rel="stylesheet" href="/static/styles.css?v=20260905-17">
+  </head>
+  <body>
+    <div class="noise" aria-hidden="true"></div>
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="VideoMASys home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32"><path d="M7 6.5h13.5A4.5 4.5 0 0 1 25 11v10a4.5 4.5 0 0 1-4.5 4.5H7V6.5Z"/><path d="m13 12 7 4-7 4v-8Z"/></svg>
+        </span>
+        <span>Video<span>MASys</span></span>
+      </a>
+      <div class="topbar-meta">
+        <button class="toolbar-button" id="newSessionButton" type="button">New analysis</button>
+        <button class="toolbar-button library-trigger" id="libraryButton" type="button" aria-haspopup="dialog">Library</button>
+        <div class="health-pill" id="healthPill" title="API and database health">
+          <span class="health-dot"></span><span id="healthText">Connecting</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="app-shell">
+      <main class="workspace">
+        <section class="intro" id="introSection">
+          <h1>Ask a video</h1>
+          <p>Upload a video or choose one from the library.</p>
+
+          <div class="start-options">
+            <label class="dropzone" id="dropzone" for="videoInput">
+              <input id="videoInput" type="file" accept="video/*" hidden>
+              <span class="upload-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></svg>
+              </span>
+              <strong>Upload video</strong>
+              <span>Drop it here or click to choose</span>
+              <small>Stays in this browser · MP4, MOV, WebM</small>
+            </label>
+            <span class="start-or">or</span>
+            <button class="library-choice" id="libraryFocusButton" type="button">
+              <span class="upload-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v12H4zM8 10h8M8 14h5"/></svg>
+              </span>
+              <strong>Open library</strong>
+              <span>Pick a NExT-QA or EgoSchema video</span>
+              <small>Example questions ready to try</small>
+            </button>
+          </div>
+          <div class="upload-progress hidden" id="uploadProgress">
+            <div class="progress-copy"><span id="uploadLabel">Uploading video</span><span id="uploadPercent">0%</span></div>
+            <div class="progress-track"><span id="uploadBar"></span></div>
+          </div>
+
+        </section>
+
+        <section class="analysis hidden" id="analysisSection">
+          <div class="analysis-header">
+            <div>
+              <div class="eyebrow"><span></span> QA workspace</div>
+              <h1 id="videoTitle">Video analysis</h1>
+            </div>
+            <div class="video-state" id="videoState"><span></span><b>Queued</b></div>
+          </div>
+
+          <div class="analysis-grid">
+            <div class="media-column">
+              <div class="video-card">
+                <video id="videoPlayer" controls preload="metadata"></video>
+                <div class="video-empty" id="videoEmpty">
+                  <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M9 10h23a5 5 0 0 1 5 5v18a5 5 0 0 1-5 5H9V10Z"/><path d="m20 19 10 5-10 5V19Zm17 2 7-4v14l-7-4"/></svg>
+                  <span>Preparing preview…</span>
+                </div>
+              </div>
+              <div class="timeline-wrap">
+                <div class="timeline-labels"><span>Retrieved evidence</span><span id="durationLabel">—</span></div>
+                <div class="timeline" id="timeline"><span class="timeline-base"></span></div>
+                <div class="timeline-scale"><span>00:00</span><span id="timelineEnd">—</span></div>
+              </div>
+              <div class="metadata-strip">
+                <div><span>Duration</span><b id="metaDuration">—</b></div>
+                <div><span>Resolution</span><b id="metaResolution">—</b></div>
+                <div><span>Cache nodes</span><b id="metaNodes">—</b></div>
+                <div><span>Content ID</span><b id="metaHash">—</b></div>
+              </div>
+            </div>
+
+            <div class="query-card">
+              <div class="query-heading">
+                <span class="step-number">01</span>
+                <div><h2>Ask the video</h2><p>The planner will retrieve only relevant intervals.</p></div>
+              </div>
+              <div class="query-select hidden" id="demoExamplePicker">
+                <label for="demoExampleSelect">Try an example question</label>
+                <select id="demoExampleSelect"></select>
+                <small id="demoExampleDataset"></small>
+              </div>
+              <label class="field-label" for="questionInput">Question</label>
+              <textarea id="questionInput" rows="3" maxlength="2000" placeholder="What is the person doing after they enter the room?"></textarea>
+
+              <div class="choice-heading">
+                <label class="field-label">Answer format</label>
+                <button class="text-button" id="toggleChoicesButton" type="button">+ Add choices</button>
+              </div>
+              <div class="choices hidden" id="choices"></div>
+              <button class="add-choice hidden" id="addChoiceButton" type="button">+ Add another choice</button>
+
+              <div class="query-select model-picker">
+                <label for="browserModel">Model</label>
+                <select id="browserModel" aria-describedby="browserModelDetail">
+                  <option value="lfm-1.6b" selected>LFM2.5-VL-1.6B · intermediate</option>
+                  <option value="lfm-450m">LFM2.5-VL-450M · light</option>
+                  <option value="lfm-3b">LFM2.5-VL-3B · high memory</option>
+                  <option value="qwen-4b">Qwen3.5-4B · very high memory</option>
+                </select>
+                <p class="model-detail" id="browserModelDetail"></p>
+              </div>
+              <span class="browser-status checking" id="browserStatus"><i></i> Checking WebGPU</span>
+              <div class="query-actions">
+                <button class="run-button" id="runButton" type="button" disabled>
+                  <span>Run analysis</span>
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                </button>
+                <button class="cancel-button hidden" id="cancelButton" type="button">Cancel</button>
+              </div>
+              <div class="browser-progress hidden" id="browserProgress" aria-live="polite">
+                <div><span id="browserProgressLabel">Loading model</span><b id="browserProgressValue"></b></div>
+                <small id="browserProgressDetail"></small>
+                <span class="browser-progress-track"><i id="browserProgressBar"></i></span>
+              </div>
+            </div>
+          </div>
+
+          <section class="pipeline-card hidden" id="pipelineCard">
+            <div class="section-title"><span class="step-number">02</span><div><h2>Interactive execution trace</h2><p id="pipelineMessage">Preparing the task…</p><small class="flow-hint">Select a stage to inspect what entered it and what it passed forward.</small></div></div>
+            <div class="pipeline" id="pipeline"></div>
+            <div class="pipeline-detail" id="pipelineDetail"></div>
+          </section>
+
+          <section class="results hidden" id="resultsSection">
+            <div class="answer-card">
+              <div class="answer-topline">
+                <span class="answer-label">Grounded answer</span>
+                <span class="confidence" id="answerConfidence">—</span>
+              </div>
+              <h2 id="answerText"></h2>
+              <div class="answer-meta" id="answerMeta"></div>
+              <div class="limitations hidden" id="limitations"></div>
+            </div>
+
+            <div class="result-grid">
+              <div class="evidence-panel">
+                <div class="panel-heading"><div><h2>Evidence trace</h2><p>Click a moment to inspect it in the source video.</p></div><span id="evidenceCount">0 moments</span></div>
+                <div class="evidence-list" id="evidenceList"></div>
+              </div>
+            </div>
+
+            <details class="browser-lab" id="browserLab">
+              <summary>Re-inspect evidence with another model</summary>
+              <div class="browser-lab-header">
+                <div class="section-title">
+                  <span class="step-number">03</span>
+                  <div>
+                    <h2 id="browserLabTitle">Optional second look</h2>
+                    <p>Use the model selector above, then inspect the retrieved frames again.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="browser-lab-grid">
+                <div class="browser-controls">
+                  <div class="browser-actions">
+                    <button class="browser-button secondary" id="loadBrowserModel" type="button" disabled>Load model</button>
+                    <button class="browser-button primary" id="runBrowserModel" type="button" disabled>Inspect selected frames</button>
+                  </div>
+                  <p class="browser-privacy">Inference and model weights stay in this browser. The backend supplies only cached evidence frames.</p>
+                </div>
+
+                <div class="browser-comparison">
+                  <div class="comparison-card local" id="localComparison">
+                    <span>Optional re-inspection</span>
+                    <b id="localModelName">Not loaded</b>
+                    <p id="localAnswer">Load a model, then inspect the retrieved evidence.</p>
+                    <small id="localMetrics"></small>
+                  </div>
+                </div>
+              </div>
+
+              <details class="browser-details hidden" id="browserDetails">
+                <summary>Browser evidence trace</summary>
+                <div class="browser-trace">
+                  <img id="browserContactSheet" alt="Timestamped contact sheet sent to the browser VLM">
+                  <div>
+                    <span class="plan-label">Local observation</span>
+                    <p id="localObservation"></p>
+                  </div>
+                </div>
+              </details>
+            </details>
+          </section>
+
+          <div class="error-banner hidden" id="errorBanner" role="alert">
+            <svg viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01M10.3 4.3 2.6 18a2 2 0 0 0 1.8 3h15.2a2 2 0 0 0 1.8-3L13.7 4.3a2 2 0 0 0-3.4 0Z"/></svg>
+            <div><strong>Something went wrong</strong><span id="errorText"></span></div>
+            <button id="dismissError" type="button" aria-label="Dismiss error">×</button>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <dialog class="library-dialog" id="libraryDialog" aria-labelledby="libraryTitle">
+      <div class="library-heading">
+        <div><h2 id="libraryTitle">Video library</h2><p>Pick a video to start. You can change the question next.</p></div>
+        <button class="toolbar-button" id="closeLibraryButton" type="button" aria-label="Close library">✕</button>
+      </div>
+      <label class="sr-only" for="librarySearch">Search videos</label>
+      <input id="librarySearch" class="library-search" type="search" placeholder="Search by video or dataset…" autocomplete="off">
+      <p class="library-notice hidden" id="libraryNotice" role="status"></p>
+      <div class="video-list" id="videoList" aria-label="Available videos"></div>
+      <div class="library-footer">
+        <button class="text-button" id="libraryUploadButton" type="button">+ Use your own video</button>
+        <button class="text-button" id="refreshVideosButton" type="button">Refresh library</button>
+      </div>
+    </dialog>
+    <div class="toast hidden" id="toast" role="status"></div>
+    <script src="/static/vendor/jsonrepair-3.15.0.min.js" defer></script>
+    <script src="/static/browser-live-pipeline.js?v=20260905-19" defer></script>
+    <script src="/static/app.js?v=20260905-21" defer></script>
+  </body>
+</html>

@@ -1,0 +1,38 @@
+[
+  {
+    "title": "NExT-QA · Christmas presents — why move to the sofa? · 90s",
+    "file": "nextqa-4882821564.mp4",
+    "thumbnail": "thumbnails/christmas-sofa.jpg",
+    "dataset": "NExT-QA",
+    "video_id": "4882821564",
+    "question": "Why did the boy pick up one present and move to the sofa?",
+    "options": ["Share with the girl", "Approach the lady sitting there", "Unwrap it", "Play with the toy train", "Gesture something"]
+  },
+  {
+    "title": "NExT-QA · Christmas presents — why return to the tree? · 90s",
+    "file": "nextqa-4882821564.mp4",
+    "thumbnail": "thumbnails/christmas-tree.jpg",
+    "dataset": "NExT-QA",
+    "video_id": "4882821564",
+    "question": "Why did the boy return to the Christmas tree after unwrapping one present?",
+    "options": ["Blow the candles", "Decorate the tree", "Continue unwrapping presents", "Look at the tree", "Put the wrapper aside"]
+  },
+  {
+    "title": "EgoSchema · Kitchen routine — overall objective · 3 min",
+    "file": "egoschema-0074f737.mp4",
+    "thumbnail": "thumbnails/kitchen.jpg",
+    "dataset": "EgoSchema",
+    "video_id": "0074f737-11cb-497d-8d07-77c3a8127391",
+    "question": "Taking into account all the actions performed by c, what can you deduce about the primary objective and focus within the video content?",
+    "options": ["C is cooking.", "C is doing laundry.", "C is cleaning the kitchen.", "C is cleaning dishes.", "C is cleaning the bathroom."]
+  },
+  {
+    "title": "EgoSchema · Painting — what is the cup of water for? · 3 min",
+    "file": "egoschema-00b9a0de.mp4",
+    "thumbnail": "thumbnails/painting.jpg",
+    "dataset": "EgoSchema",
+    "video_id": "00b9a0de-c59e-49cb-a127-6081e2fb8c8e",
+    "question": "What was the primary purpose of the cup of water in this video, and how did it contribute to the overall painting process?",
+    "options": ["To provide a source of water for the paintbrush.", "To provide a place to store the paintbrush.", "To provide a place to dispose of the paintbrush.", "To provide a place to rest the paintbrush.", "To clean the paintbrush."]
+  }
+]
